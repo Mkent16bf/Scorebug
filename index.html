@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Score Bug</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+        
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+            background-color: #111; color: white;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; /* Prevents accidental scrolling on the iPad */
+        }
+
+        #scoreboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 98vw; height: 95vh; /* Expands the box to fill the entire screen */
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .team-panel {
+            padding: 2vw;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+        }
+
+        .team-name { font-size: 7vh; font-weight: 700; margin-bottom: 2vh; }
+        .team-score { font-size: 24vh; font-weight: 700; line-height: 1; }
+        
+        .game-data {
+            grid-column: span 2;
+            background: #222; color: #FFF;
+            padding: 2vh 2vw;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-top: 8px solid #444;
+        }
+
+        .data-row { margin: 1.5vh 0; font-size: 5vh; font-weight: 700; }
+        #message-board { display: block; text-align: center; font-size: 6vh; padding: 5vw; }
+    </style>
+</head>
+<body>
+
+    <div id="message-board">Loading sync...</div>
+
+    <div id="scoreboard">
+        <div id="home-panel" class="team-panel">
+            <div id="home-name" class="team-name">HOME</div>
+            <div id="home-score" class="team-score">0</div>
+            <div id="home-timeouts" class="data-row">Timeouts: 3</div>
+        </div>
+        <div id="away-panel" class="team-panel">
+            <div id="away-name" class="team-name">AWAY</div>
+            <div id="away-score" class="team-score">0</div>
+            <div id="away-timeouts" class="data-row">Timeouts: 3</div>
+        </div>
+        <div class="game-data">
+            <div id="down-distance" class="data-row"></div>
+            <div id="field-position" class="data-row"></div>
+            <div id="last-play" class="data-row"></div>
+        </div>
+    </div>
+
+    <script>
+        function hexToRgb(hex) {
+            let bigint = parseInt(hex.replace('#', ''), 16);
+            return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+        }
+
+        function calculateDistance(rgb1, rgb2) {
+            return Math.sqrt(
+                Math.pow(rgb1.r - rgb2.r, 2) + 
+                Math.pow(rgb1.g - rgb2.g, 2) + 
+                Math.pow(rgb1.b - rgb2.b, 2)
+            );
+        }
+
+        function getTextColorYIQ(rgb) {
+            let yiq = ((rgb.r * 299) + (rgb.g * 587) + (rgb.b * 114)) / 1000;
+            return (yiq >= 128) ? 'black' : 'white';
+        }
+
+        async function updateScoreboard() {
+            try {
+                const response = await fetch('/api/score');
+                const data = await response.json();
+
+                if (!data.active) {
+                    document.getElementById('scoreboard').style.display = 'none';
+                    document.getElementById('message-board').style.display = 'block';
+                    document.getElementById('message-board').innerText = data.message;
+                    return;
+                }
+
+                document.getElementById('scoreboard').style.display = 'grid';
+                document.getElementById('message-board').style.display = 'none';
+
+                // Populate Text
+                document.getElementById('home-name').innerText = data.home.name;
+                document.getElementById('home-score').innerText = data.home.score;
+                document.getElementById('home-timeouts').innerText = data.home.timeouts !== "" ? "Timeouts: " + data.home.timeouts : "";
+                
+                
+                document.getElementById('away-name').innerText = data.away.name;
+                document.getElementById('away-score').innerText = data.away.score;
+               document.getElementById('away-timeouts').innerText = data.away.timeouts !== "" ? "Timeouts: " + data.away.timeouts : "";
+
+                document.getElementById('down-distance').innerText = data.down_distance;
+                document.getElementById('field-position').innerText = data.field_position;
+                document.getElementById('last-play').innerText = data.last_play;
+
+                // Color Logic
+                let homeRgb = hexToRgb(data.home.primary_color);
+                let awayPrimaryRgb = hexToRgb(data.away.primary_color);
+                let awaySecondaryRgb = hexToRgb(data.away.secondary_color);
+
+                let distPrimary = calculateDistance(homeRgb, awayPrimaryRgb);
+                let distSecondary = calculateDistance(homeRgb, awaySecondaryRgb);
+                let finalAwayRgb = awayPrimaryRgb;
+
+                if (distPrimary < 100) {
+                    finalAwayRgb = awaySecondaryRgb;
+                    if (distSecondary < 100) {
+                        finalAwayRgb = {r: 255, g: 255, b: 255}; // Default to White
+                    }
+                }
+
+                // Apply Backgrounds
+                let homePanel = document.getElementById('home-panel');
+                let awayPanel = document.getElementById('away-panel');
+                
+                homePanel.style.backgroundColor = `rgb(${homeRgb.r}, ${homeRgb.g}, ${homeRgb.b})`;
+                awayPanel.style.backgroundColor = `rgb(${finalAwayRgb.r}, ${finalAwayRgb.g}, ${finalAwayRgb.b})`;
+
+                // Apply Text Contrasts
+                homePanel.style.color = getTextColorYIQ(homeRgb);
+                awayPanel.style.color = getTextColorYIQ(finalAwayRgb);
+
+            } catch (err) {
+                console.error("Error fetching score:", err);
+            }
+        }
+
+        setInterval(updateScoreboard, 2000); // UI updates every 2s to catch backend polling
+        updateScoreboard();
+    </script>
+</body>
+</html>
