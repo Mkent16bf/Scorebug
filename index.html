@@ -5,46 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Score Bug</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
-        
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            background-color: #111; color: white;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; /* Prevents accidental scrolling on the iPad */
-        }
+    @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+    
+    body, html {
+        margin: 0; padding: 0; width: 100%; height: 100%;
+        font-family: 'Atkinson Hyperlegible', sans-serif;
+        background-color: #111; color: white;
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden;
+    }
 
-        #scoreboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 98vw; height: 95vh; /* Expands the box to fill the entire screen */
-            border-radius: 20px; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: none;
-        }
+    #scoreboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 98vw; height: 95vh;
+        border-radius: 20px; overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        display: none;
+    }
 
-        .team-panel {
-            padding: 2vw;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            text-align: center;
-        }
+    .team-panel {
+        padding: 1vw;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        text-align: center;
+    }
 
-        .team-name { font-size: 7vh; font-weight: 700; margin-bottom: 2vh; }
-        .team-score { font-size: 24vh; font-weight: 700; line-height: 1; }
-        
-        .game-data {
-            grid-column: span 2;
-            background: #222; color: #FFF;
-            padding: 2vh 2vw;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-top: 8px solid #444;
-        }
+    .team-name { font-size: 10vh; font-weight: 700; margin-bottom: 0; }
+    .team-score { font-size: 35vh; font-weight: 700; line-height: 1; margin: 0; }
+    .timeouts { font-size: 5vh; font-weight: 700; margin-top: 1vh; }
+    
+    .game-data {
+        grid-column: span 2;
+        background: #222; color: #FFF;
+        padding: 1vh 2vw;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border-top: 8px solid #444;
+    }
 
-        .data-row { margin: 1.5vh 0; font-size: 5vh; font-weight: 700; }
-        #message-board { display: block; text-align: center; font-size: 6vh; padding: 5vw; }
-    </style>
+    .data-row { margin: 0.5vh 0; font-size: 6vh; font-weight: 700; text-align: center; }
+    #game-clock { font-size: 8vh; color: #FFD700; } /* Yellow for high visibility */
+    #last-play { font-size: 4vh; font-weight: 400; color: #CCC; }
+    
+    #message-board { display: block; text-align: center; font-size: 6vh; padding: 5vw; }
+</style>
 </head>
 <body>
 
