@@ -71,7 +71,14 @@ def fetch_game_data():
             state_history.pop(0)
             
         time.sleep(POLL_INTERVAL)
+thread_started = False
 
+@app.before_request
+def start_background_thread():
+    global thread_started
+    if not thread_started:
+        threading.Thread(target=fetch_game_data, daemon=True).start()
+        thread_started = True
 @app.route('/api/score')
 def get_score():
     target_time = datetime.now() - timedelta(seconds=BROADCAST_DELAY_SECONDS)
