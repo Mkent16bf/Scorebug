@@ -33,28 +33,31 @@ def fetch_game_data():
                         home = next(c for c in competitors if c["homeAway"] == "home")
                         away = next(c for c in competitors if c["homeAway"] == "away")
                         situation = event["competitions"][0].get("situation", {})
-                        
-                        payload = {
-                            "active": True,
-                            "sport": team["name"],
-                            "home": {
-                                "name": home["team"]["abbreviation"],
-                                "score": home.get("score", "0"),
-                                "primary_color": home["team"].get("color", "000000"),
-                                "timeouts": situation.get("homeTimeouts", 3) if team["name"] == "Bills" else ""
-                            },
-                            "away": {
-                                "name": away["team"]["abbreviation"],
-                                "score": away.get("score", "0"),
-                                "primary_color": away["team"].get("color", "FFFFFF"),
-                                "secondary_color": away["team"].get("alternateColor", "CCCCCC"),
-                                "timeouts": situation.get("awayTimeouts", 3) if team["name"] == "Bills" else ""
-                            },
-                            "down_distance": situation.get("downDistanceText", ""),
-                            "field_position": situation.get("possessionText", ""),
-                            "last_play": situation.get("lastPlay", {}).get("text", "No recent play"),
-                            "possession": situation.get("possession", "")
-                        }
+                    status = event["competitions"][0].get("status", {})
+                    
+                    payload = {
+                        "active": True,
+                        "sport": team["name"],
+                        "clock": status.get("displayClock", ""),
+                        "period": status.get("period", 1),
+                        "home": {
+                            "name": home["team"]["abbreviation"],
+                            "score": home.get("score", "0"),
+                            "primary_color": home["team"].get("color", "000000"),
+                            "timeouts": situation.get("homeTimeouts", 3) if team["name"] == "Bills" else ""
+                        },
+                        "away": {
+                            "name": away["team"]["abbreviation"],
+                            "score": away.get("score", "0"),
+                            "primary_color": away["team"].get("color", "FFFFFF"),
+                            "secondary_color": away["team"].get("alternateColor", "CCCCCC"),
+                            "timeouts": situation.get("awayTimeouts", 3) if team["name"] == "Bills" else ""
+                        },
+                        "down_distance": situation.get("downDistanceText", ""),
+                        "field_position": situation.get("possessionText", ""),
+                        "last_play": situation.get("lastPlay", {}).get("text", "No recent play"),
+                        "possession": situation.get("possession", "")
+                    }
                         state_history.append({"time": datetime.now(), "data": payload})
                         game_found = True
                         break
