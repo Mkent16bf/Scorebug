@@ -85,6 +85,8 @@ def get_score():
 def index():
     return render_template('index.html')
 
+# Start the background polling thread so Gunicorn runs it
+threading.Thread(target=fetch_game_data, daemon=True).start()
+
 if __name__ == '__main__':
-    threading.Thread(target=fetch_game_data, daemon=True).start()
     app.run(host='0.0.0.0', port=5001)
