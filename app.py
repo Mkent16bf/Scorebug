@@ -58,9 +58,9 @@ def fetch_game_data():
                         "last_play": situation.get("lastPlay", {}).get("text", "No recent play"),
                         "possession": situation.get("possession", "")
                     }
-                        state_history.append({"time": datetime.now(), "data": payload})
-                        game_found = True
-                        break
+                    state_history.append({"time": datetime.now(), "data": payload})
+                    game_found = True
+                    break
             except Exception as e:
                 print(f"Error fetching {team['name']}: {e}")
             if game_found:
