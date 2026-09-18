@@ -108,6 +108,10 @@
                 document.getElementById('message-board').style.display = 'none';
 
                 // Populate Text
+                let periodPrefix = data.sport === "Bills" ? "Q" : (data.sport === "Sabres" ? "P" : "IN ");
+                let clockDisplay = data.clock !== "" ? data.clock : "0:00";
+                document.getElementById('game-clock').innerText = periodPrefix + data.period + " | " + clockDisplay;
+                
                 document.getElementById('home-name').innerText = data.home.name;
                 document.getElementById('home-score').innerText = data.home.score;
                 document.getElementById('home-timeouts').innerText = data.home.timeouts !== "" ? "Timeouts: " + data.home.timeouts : "";
